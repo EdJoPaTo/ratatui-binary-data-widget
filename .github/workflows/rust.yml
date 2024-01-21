@@ -1,0 +1,123 @@
+name: Test and Build Rust
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Check if it works with current dependencies
+    - cron: '42 2 * * 6' # weekly on Saturday 2:42 UTC
+
+env:
+  RUSTFLAGS: --deny warnings
+
+jobs:
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt
+      - uses: actions/checkout@v4
+      - run: cargo fmt --check --verbose
+
+  test:
+    name: Test ${{ matrix.toolchain }} ${{ matrix.os }} ${{ matrix.features }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ (matrix.toolchain == 'beta') || (matrix.toolchain == 'nightly') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - stable
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        clippyargs:
+          - -D clippy::pedantic
+        features:
+          - "" # default features
+        include:
+          # Check future versions and maybe get some glances on soon to be lints
+          - toolchain: beta
+            os: ubuntu-latest
+            features: --all-features
+            clippyargs: -D clippy::pedantic -D clippy::nursery -D clippy::cargo
+          - toolchain: nightly
+            os: ubuntu-latest
+            features: --all-features
+            clippyargs: -D clippy::pedantic
+    steps:
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: clippy
+
+      - uses: actions/checkout@v4
+
+      - name: Fetch dependencies
+        run: cargo fetch --verbose
+
+      - name: Check clippy
+        run: cargo clippy --verbose --all-targets ${{ matrix.features }} -- ${{ matrix.clippyargs }}
+
+      - name: Check docs
+        run: cargo doc --verbose --no-deps ${{ matrix.features }}
+
+      - name: Build
+        run: cargo build --verbose --all-targets ${{ matrix.features }}
+
+      - name: Run tests
+        run: cargo test --verbose ${{ matrix.features }}
+
+  github-release:
+    name: Release ${{ matrix.triple }}
+    runs-on: ${{ matrix.os }}
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - triple: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - triple: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - triple: armv7-unknown-linux-gnueabihf
+            os: ubuntu-latest
+          - triple: arm-unknown-linux-gnueabihf
+            os: ubuntu-latest
+          - triple: riscv64gc-unknown-linux-gnu
+            os: ubuntu-latest
+
+          - triple: x86_64-apple-darwin
+            os: macos-latest
+          - triple: aarch64-apple-darwin
+            os: macos-latest
+
+          - triple: x86_64-pc-windows-msvc
+            os: windows-latest
+          - triple: aarch64-pc-windows-msvc
+            os: windows-latest
+    steps:
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: ${{ matrix.triple }}
+
+      - name: Install cargo tools
+        if: runner.os == 'Linux'
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - uses: actions/checkout@v4
+
+      - name: Fetch dependencies
+        run: cargo fetch --verbose
+
+      - name: Build
+        run: ${{ runner.os == 'Linux' && 'cross' || 'cargo' }} build --release --verbose --target ${{ matrix.triple }}

@@ -1,0 +1,20 @@
+[package]
+name = "ratatui-binary-data-widget"
+description = "Binary Data Widget for ratatui"
+version = "0.1.0"
+license = "MIT"
+repository = "https://github.com/EdJoPaTo/ratatui-binary-data-widget"
+authors = ["EdJoPaTo <ratatui-binary-data-widget-rust@edjopato.de>"]
+edition = "2021"
+keywords = ["tui", "terminal", "binary", "widget"]
+categories = ["command-line-interface"]
+include = ["src/**/*", "README.md"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ratatui = { version = "0.25", default-features = false }
+unicode-width = "0.1"
+
+[dev-dependencies]
+crossterm = "0.27"
+ratatui = "0.25"
