@@ -91,7 +91,7 @@ impl BinaryDataWidgetState {
 /// # use ratatui_binary_data_widget::{BinaryDataWidget, BinaryDataWidgetState};
 /// # use ratatui::backend::TestBackend;
 /// # use ratatui::Terminal;
-/// # use ratatui::widgets::{Block, Borders};
+/// # use ratatui::widgets::Block;
 /// # let mut terminal = Terminal::new(TestBackend::new(32, 32)).unwrap();
 /// let mut state = BinaryDataWidgetState::new();
 ///
@@ -101,7 +101,7 @@ impl BinaryDataWidgetState {
 ///     let area = f.size();
 ///
 ///     let widget = BinaryDataWidget::new(data)
-///         .block(Block::new().borders(Borders::ALL).title("Binary Data Widget"));
+///         .block(Block::bordered().title("Binary Data Widget"));
 ///
 ///     f.render_stateful_widget(widget, area, &mut state);
 /// })?;

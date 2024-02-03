@@ -6,7 +6,7 @@ use crossterm::{
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     style::{Color, Modifier, Style},
-    widgets::{Block, Borders},
+    widgets::Block,
     Terminal,
 };
 use std::error::Error;
@@ -73,11 +73,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
             let area = f.size();
 
             let items = BinaryDataWidget::new(app.data)
-                .block(
-                    Block::new()
-                        .borders(Borders::ALL)
-                        .title("Binary Data Widget"),
-                )
+                .block(Block::bordered().title("Binary Data Widget"))
                 .highlight_style(
                     Style::new()
                         .fg(Color::Black)
