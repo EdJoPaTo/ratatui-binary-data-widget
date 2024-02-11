@@ -264,6 +264,8 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
         let address_width = address_width as usize;
 
         for line_index in 0..visible_lines {
+            const ADDRESS_STYLE: Style = Style::new().fg(Color::Cyan);
+
             let y = area.top().saturating_add(line_index);
 
             let offset_address = start_line
@@ -271,7 +273,7 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 .saturating_mul(per_row as usize);
 
             let address_text = format!("{offset_address:>address_width$x}: ");
-            buf.set_stringn(x, y, address_text, area.width as usize, Style::new());
+            buf.set_stringn(x, y, address_text, area.width as usize, ADDRESS_STYLE);
 
             for i in 0..per_row {
                 let address = offset_address.saturating_add(i as usize);
