@@ -83,15 +83,23 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
             f.render_stateful_widget(items, area, &mut app.state);
         })?;
 
-        if let Event::Key(key) = event::read()? {
-            match key.code {
+        match event::read()? {
+            Event::Key(key) => match key.code {
                 KeyCode::Char('q') => return Ok(()),
                 KeyCode::Left => app.state.key_left(),
                 KeyCode::Right => app.state.key_right(),
                 KeyCode::Down => app.state.key_down(),
                 KeyCode::Up => app.state.key_up(),
+                KeyCode::PageDown => app.state.scroll_down(10),
+                KeyCode::PageUp => app.state.scroll_up(10),
                 _ => {}
-            }
+            },
+            Event::Mouse(event) => match event.kind {
+                event::MouseEventKind::ScrollDown => app.state.scroll_down(1),
+                event::MouseEventKind::ScrollUp => app.state.scroll_up(1),
+                _ => {}
+            },
+            _ => (),
         }
     }
 }
