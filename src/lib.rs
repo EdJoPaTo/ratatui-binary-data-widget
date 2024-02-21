@@ -11,7 +11,7 @@ The user interaction state (like the current selection) is stored in the [`Binar
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
-use ratatui::style::{Color, Style};
+use ratatui::style::{Color, Modifier, Style};
 use ratatui::widgets::block::BlockExt;
 use ratatui::widgets::{Block, StatefulWidget, Widget};
 
@@ -373,17 +373,27 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 let Some(value) = self.data.get(address) else {
                     break;
                 };
+                let char = *value as char;
+                let displayable = char.is_ascii_graphic();
+
+                let style = if Some(address) == state.selected_address {
+                    self.highlight_style
+                } else if *value == 0 {
+                    Style::new().fg(Color::DarkGray)
+                } else if char.is_ascii_whitespace() {
+                    Style::new().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+                } else if displayable {
+                    Style::new()
+                        .fg(Color::LightGreen)
+                        .add_modifier(Modifier::BOLD)
+                } else if char.is_ascii_control() {
+                    Style::new().fg(Color::Red).add_modifier(Modifier::BOLD)
+                } else {
+                    Style::new()
+                };
 
                 // Hex
                 {
-                    let style = if Some(address) == state.selected_address {
-                        self.highlight_style
-                    } else if *value > 0 {
-                        Style::new()
-                    } else {
-                        Style::new().fg(Color::DarkGray)
-                    };
-
                     let x = positions.x_hex(i);
                     let text = format!("{value:>2x}");
                     buf.set_string(x, y, text, style);
@@ -391,23 +401,11 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
 
                 // Char
                 {
-                    let char = *value as char;
                     let x = positions.x_char(i);
-                    let displayable = char.is_ascii_graphic();
-
-                    let style = if Some(address) == state.selected_address {
-                        self.highlight_style
-                    } else if displayable {
-                        Style::new()
-                    } else {
-                        Style::new().fg(Color::DarkGray)
-                    };
-
                     if displayable {
                         buf.set_string(x, y, char.to_string(), style);
                     } else {
-                        let non_displayable_style = style.fg(Color::DarkGray);
-                        buf.set_string(x, y, "·", non_displayable_style);
+                        buf.set_string(x, y, "·", style);
                     }
                 }
             }
