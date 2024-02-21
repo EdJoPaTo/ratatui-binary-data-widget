@@ -1,4 +1,5 @@
 #![forbid(unsafe_code)]
+#![warn(clippy::pedantic, clippy::nursery)]
 #![allow(clippy::cast_possible_truncation)]
 
 /*!
