@@ -97,6 +97,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
             Event::Mouse(event) => match event.kind {
                 event::MouseEventKind::ScrollDown => app.state.scroll_down(1),
                 event::MouseEventKind::ScrollUp => app.state.scroll_up(1),
+                event::MouseEventKind::Down(_) => {
+                    if let Some(address) = app.state.clicked_address(event.column, event.row) {
+                        app.state.select(Some(address));
+                    }
+                }
                 _ => {}
             },
             _ => (),
