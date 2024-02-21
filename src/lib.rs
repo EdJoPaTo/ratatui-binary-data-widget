@@ -326,31 +326,27 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
             state.selected_address = Some(self.data.len().saturating_sub(1).min(selected));
         }
 
-        if state.ensure_selected_in_view_on_next_render {
-            if let Some(selected_address) = state.selected_address {
-                state.offset_address = state
-                    .offset_address
-                    .min(selected_address.saturating_div(per_row as usize));
-            }
-        }
-
         let available_height = area.height as usize;
 
         let mut start_line = state.offset_address.saturating_div(per_row as usize);
-        let mut end_line = start_line.saturating_add(available_height);
         if state.ensure_selected_in_view_on_next_render {
-            // Move offset down to get selection into view
             if let Some(selected_address) = state.selected_address {
                 let selected_line = selected_address.saturating_div(per_row as usize);
-                if selected_line >= end_line {
-                    end_line = selected_line.saturating_add(1);
-                    start_line = end_line.saturating_sub(available_height);
+                if selected_line < start_line {
+                    // Move offset up
+                    start_line = selected_line;
+                } else {
+                    let end_line = start_line.saturating_add(available_height);
+                    if selected_line >= end_line {
+                        // Move offset down
+                        let end_line = selected_line.saturating_add(1);
+                        start_line = end_line.saturating_sub(available_height);
+                    }
                 }
             }
-            state.offset_address = start_line.saturating_div(per_row as usize);
+            state.offset_address = start_line.saturating_mul(per_row as usize);
+            state.ensure_selected_in_view_on_next_render = false;
         }
-
-        state.ensure_selected_in_view_on_next_render = false;
 
         let visible_lines = available_data_lines
             .saturating_sub(start_line)

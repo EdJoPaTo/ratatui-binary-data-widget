@@ -5,7 +5,9 @@ use crossterm::{
 };
 use ratatui::{
     backend::{Backend, CrosstermBackend},
+    layout::Rect,
     style::{Color, Modifier, Style},
+    text::Span,
     widgets::Block,
     Terminal,
 };
@@ -73,8 +75,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
         if update {
             terminal.draw(|frame| {
                 let area = frame.size();
-
-                let items = BinaryDataWidget::new(app.data)
+                let widget = BinaryDataWidget::new(app.data)
                     .block(Block::bordered().title("Binary Data Widget"))
                     .highlight_style(
                         Style::new()
@@ -82,7 +83,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
                             .bg(Color::LightGreen)
                             .add_modifier(Modifier::BOLD),
                     );
-                frame.render_stateful_widget(items, area, &mut app.state);
+                frame.render_stateful_widget(widget, area, &mut app.state);
+
+                if let Some(selected) = app.state.selected() {
+                    let meta = format!("Selected: {selected:x}");
+                    let meta_area = Rect::new(1, area.height - 1, area.width - 1, 1);
+                    frame.render_widget(Span::raw(meta), meta_area);
+                }
             })?;
         }
         update = match handle_events(&mut app)? {
@@ -104,6 +111,9 @@ fn handle_events(app: &mut App) -> std::io::Result<Update> {
     match event::read()? {
         Event::Key(key) => match key.code {
             KeyCode::Char('q') => return Ok(Update::Quit),
+            KeyCode::Esc => app.state.select(None),
+            KeyCode::Home => app.state.select(Some(0)),
+            KeyCode::End => app.state.select(Some(usize::MAX)),
             KeyCode::Left => app.state.key_left(),
             KeyCode::Right => app.state.key_right(),
             KeyCode::Down => app.state.key_down(),
