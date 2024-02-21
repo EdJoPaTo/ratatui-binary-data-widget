@@ -69,8 +69,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Result<()> {
     loop {
-        terminal.draw(|f| {
-            let area = f.size();
+        terminal.draw(|frame| {
+            let area = frame.size();
 
             let items = BinaryDataWidget::new(app.data)
                 .block(Block::bordered().title("Binary Data Widget"))
@@ -80,7 +80,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
                         .bg(Color::LightGreen)
                         .add_modifier(Modifier::BOLD),
                 );
-            f.render_stateful_widget(items, area, &mut app.state);
+            frame.render_stateful_widget(items, area, &mut app.state);
         })?;
 
         match event::read()? {
