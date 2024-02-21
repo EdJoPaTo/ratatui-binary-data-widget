@@ -68,43 +68,62 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Result<()> {
+    let mut update = true;
     loop {
-        terminal.draw(|frame| {
-            let area = frame.size();
+        if update {
+            terminal.draw(|frame| {
+                let area = frame.size();
 
-            let items = BinaryDataWidget::new(app.data)
-                .block(Block::bordered().title("Binary Data Widget"))
-                .highlight_style(
-                    Style::new()
-                        .fg(Color::Black)
-                        .bg(Color::LightGreen)
-                        .add_modifier(Modifier::BOLD),
-                );
-            frame.render_stateful_widget(items, area, &mut app.state);
-        })?;
-
-        match event::read()? {
-            Event::Key(key) => match key.code {
-                KeyCode::Char('q') => return Ok(()),
-                KeyCode::Left => app.state.key_left(),
-                KeyCode::Right => app.state.key_right(),
-                KeyCode::Down => app.state.key_down(),
-                KeyCode::Up => app.state.key_up(),
-                KeyCode::PageDown => app.state.scroll_down(10),
-                KeyCode::PageUp => app.state.scroll_up(10),
-                _ => {}
-            },
-            Event::Mouse(event) => match event.kind {
-                event::MouseEventKind::ScrollDown => app.state.scroll_down(1),
-                event::MouseEventKind::ScrollUp => app.state.scroll_up(1),
-                event::MouseEventKind::Down(_) => {
-                    if let Some(address) = app.state.clicked_address(event.column, event.row) {
-                        app.state.select(Some(address));
-                    }
-                }
-                _ => {}
-            },
-            _ => (),
+                let items = BinaryDataWidget::new(app.data)
+                    .block(Block::bordered().title("Binary Data Widget"))
+                    .highlight_style(
+                        Style::new()
+                            .fg(Color::Black)
+                            .bg(Color::LightGreen)
+                            .add_modifier(Modifier::BOLD),
+                    );
+                frame.render_stateful_widget(items, area, &mut app.state);
+            })?;
         }
+        update = match handle_events(&mut app)? {
+            Update::Quit => return Ok(()),
+            Update::Redraw => true,
+            Update::Skip => false,
+        };
     }
+}
+
+enum Update {
+    Quit,
+    Redraw,
+    Skip,
+}
+
+/// Returns true when the widget should be updated
+fn handle_events(app: &mut App) -> std::io::Result<Update> {
+    match event::read()? {
+        Event::Key(key) => match key.code {
+            KeyCode::Char('q') => return Ok(Update::Quit),
+            KeyCode::Left => app.state.key_left(),
+            KeyCode::Right => app.state.key_right(),
+            KeyCode::Down => app.state.key_down(),
+            KeyCode::Up => app.state.key_up(),
+            KeyCode::PageDown => app.state.scroll_down(10),
+            KeyCode::PageUp => app.state.scroll_up(10),
+            _ => return Ok(Update::Skip),
+        },
+        Event::Mouse(event) => match event.kind {
+            event::MouseEventKind::ScrollDown => app.state.scroll_down(1),
+            event::MouseEventKind::ScrollUp => app.state.scroll_up(1),
+            event::MouseEventKind::Down(_) => {
+                if let Some(address) = app.state.clicked_address(event.column, event.row) {
+                    app.state.select(Some(address));
+                }
+            }
+            _ => return Ok(Update::Skip),
+        },
+        Event::Resize(_, _) => return Ok(Update::Redraw),
+        _ => return Ok(Update::Skip),
+    }
+    Ok(Update::Redraw)
 }
