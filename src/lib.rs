@@ -10,10 +10,12 @@ The user interaction state (like the current selection) is stored in the [`Binar
 */
 
 use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use ratatui::layout::{Margin, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::widgets::block::BlockExt;
-use ratatui::widgets::{Block, StatefulWidget, Widget};
+use ratatui::widgets::{
+    Block, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget,
+};
 
 mod render_positions;
 mod state;
@@ -104,13 +106,13 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
     type State = BinaryDataWidgetState;
 
     #[allow(clippy::too_many_lines)]
-    fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
-        buf.set_style(area, self.style);
+    fn render(self, full_area: Rect, buf: &mut Buffer, state: &mut Self::State) {
+        buf.set_style(full_area, self.style);
 
         // Get the inner area inside a possible block, otherwise use the full area
-        let area = self.block.map_or(area, |block| {
-            let inner_area = block.inner(area);
-            block.render(area, buf);
+        let area = self.block.map_or(full_area, |block| {
+            let inner_area = block.inner(full_area);
+            block.render(full_area, buf);
             inner_area
         });
 
@@ -156,10 +158,28 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
 
         let visible_lines = available_data_lines
             .saturating_sub(start_line)
-            .min(available_height) as u16;
+            .min(available_height);
 
-        let x = area.left();
+        {
+            // Render Scrollbar
+            // When there is a border to the right it is rendered on top.
+            // -> Scrollbar and data always visible
+            // When there is no border it is still rendered before the binary data
+            // -> the scrollbar might not be visible but the data always is
+            let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight)
+                .begin_symbol(None)
+                .track_symbol(None)
+                .end_symbol(None);
+            let mut scrollbar_state = ScrollbarState::new(available_data_lines)
+                .position(start_line)
+                .viewport_content_length(available_height);
+            let scrollbar_area = full_area.inner(&Margin::new(0, 1));
+            scrollbar.render(scrollbar_area, buf, &mut scrollbar_state);
+        }
+
         let address_width = address_width as usize;
+        let visible_lines = visible_lines as u16;
+        let x = area.left();
 
         for line_index in 0..visible_lines {
             const ADDRESS_STYLE: Style = Style::new().fg(Color::Cyan);
