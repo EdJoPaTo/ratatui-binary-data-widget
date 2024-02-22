@@ -92,7 +92,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
                 }
             })?;
         }
-        update = match handle_events(&mut app)? {
+        let area = terminal.size().expect("Should have a size");
+        update = match handle_events(&mut app, area)? {
             Update::Quit => return Ok(()),
             Update::Redraw => true,
             Update::Skip => false,
@@ -107,7 +108,7 @@ enum Update {
 }
 
 /// Returns true when the widget should be updated
-fn handle_events(app: &mut App) -> std::io::Result<Update> {
+fn handle_events(app: &mut App, area: Rect) -> std::io::Result<Update> {
     match event::read()? {
         Event::Key(key) => match key.code {
             KeyCode::Char('q') => return Ok(Update::Quit),
@@ -118,8 +119,8 @@ fn handle_events(app: &mut App) -> std::io::Result<Update> {
             KeyCode::Right => app.state.key_right(),
             KeyCode::Down => app.state.key_down(),
             KeyCode::Up => app.state.key_up(),
-            KeyCode::PageDown => app.state.scroll_down(10),
-            KeyCode::PageUp => app.state.scroll_up(10),
+            KeyCode::PageDown => app.state.scroll_down((area.height / 2) as usize),
+            KeyCode::PageUp => app.state.scroll_up((area.height / 2) as usize),
             _ => return Ok(Update::Skip),
         },
         Event::Mouse(event) => match event.kind {
