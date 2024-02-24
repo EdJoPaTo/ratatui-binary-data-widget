@@ -8,7 +8,7 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 use ratatui::widgets::Block;
-use ratatui::Terminal;
+use ratatui::{Frame, Terminal};
 
 use ratatui_binary_data_widget::{BinaryDataWidget, BinaryDataWidgetState};
 
@@ -22,6 +22,25 @@ impl<'a> App<'a> {
         Self {
             data,
             state: BinaryDataWidgetState::new(),
+        }
+    }
+
+    fn draw(&mut self, frame: &mut Frame) {
+        let area = frame.size();
+        let widget = BinaryDataWidget::new(self.data)
+            .block(Block::bordered().title("Binary Data Widget"))
+            .highlight_style(
+                Style::new()
+                    .fg(Color::Black)
+                    .bg(Color::LightGreen)
+                    .add_modifier(Modifier::BOLD),
+            );
+        frame.render_stateful_widget(widget, area, &mut self.state);
+
+        if let Some(selected) = self.state.selected() {
+            let meta = format!("Selected: {selected:x}");
+            let meta_area = Rect::new(1, area.height - 1, area.width - 1, 1);
+            frame.render_widget(Span::raw(meta), meta_area);
         }
     }
 }
@@ -71,24 +90,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
     let mut update = true;
     loop {
         if update {
-            terminal.draw(|frame| {
-                let area = frame.size();
-                let widget = BinaryDataWidget::new(app.data)
-                    .block(Block::bordered().title("Binary Data Widget"))
-                    .highlight_style(
-                        Style::new()
-                            .fg(Color::Black)
-                            .bg(Color::LightGreen)
-                            .add_modifier(Modifier::BOLD),
-                    );
-                frame.render_stateful_widget(widget, area, &mut app.state);
-
-                if let Some(selected) = app.state.selected() {
-                    let meta = format!("Selected: {selected:x}");
-                    let meta_area = Rect::new(1, area.height - 1, area.width - 1, 1);
-                    frame.render_widget(Span::raw(meta), meta_area);
-                }
-            })?;
+            terminal.draw(|frame| app.draw(frame))?;
         }
         let area = terminal.size().expect("Should have a size");
         update = match handle_events(&mut app, area)? {
