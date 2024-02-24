@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs;
 use std::path::Path;
+use std::time::{Duration, Instant};
 
 use crossterm::event::{Event, KeyCode, MouseEventKind};
 use ratatui::backend::{Backend, CrosstermBackend};
@@ -87,17 +88,25 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Result<()> {
-    let mut update = true;
+    const DEBOUNCE: Duration = Duration::from_millis(20); // 50 FPS
+    terminal.draw(|frame| app.draw(frame))?;
+    let mut debounce: Option<Instant> = None;
     loop {
-        if update {
-            terminal.draw(|frame| app.draw(frame))?;
+        let timeout = debounce.map_or(DEBOUNCE, |since| DEBOUNCE.saturating_sub(since.elapsed()));
+        if crossterm::event::poll(timeout)? {
+            let area = terminal.size().expect("Should have a size");
+            match handle_events(&mut app, area)? {
+                Update::Quit => return Ok(()),
+                Update::Redraw => {
+                    debounce.get_or_insert_with(Instant::now);
+                }
+                Update::Skip => {}
+            }
         }
-        let area = terminal.size().expect("Should have a size");
-        update = match handle_events(&mut app, area)? {
-            Update::Quit => return Ok(()),
-            Update::Redraw => true,
-            Update::Skip => false,
-        };
+        if debounce.is_some_and(|o| o.elapsed() > DEBOUNCE) {
+            terminal.draw(|frame| app.draw(frame))?;
+            debounce = None;
+        }
     }
 }
 
@@ -107,7 +116,6 @@ enum Update {
     Skip,
 }
 
-/// Returns true when the widget should be updated
 fn handle_events(app: &mut App, area: Rect) -> std::io::Result<Update> {
     match crossterm::event::read()? {
         Event::Key(key) => match key.code {
