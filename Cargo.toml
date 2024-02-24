@@ -12,6 +12,7 @@ include = ["src/**/*", "README.md"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# ratatui = { path = "/home/edjopato/git/hub/EdJoPaTo-fork/public/ratatui" }
 ratatui = { version = "0.26", default-features = false }
 
 [dev-dependencies]

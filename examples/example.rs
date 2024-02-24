@@ -1,19 +1,14 @@
-use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-};
-use ratatui::{
-    backend::{Backend, CrosstermBackend},
-    layout::Rect,
-    style::{Color, Modifier, Style},
-    text::Span,
-    widgets::Block,
-    Terminal,
-};
 use std::error::Error;
 use std::fs;
 use std::path::Path;
+
+use crossterm::event::{Event, KeyCode, MouseEventKind};
+use ratatui::backend::{Backend, CrosstermBackend};
+use ratatui::layout::Rect;
+use ratatui::style::{Color, Modifier, Style};
+use ratatui::text::Span;
+use ratatui::widgets::Block;
+use ratatui::Terminal;
 
 use ratatui_binary_data_widget::{BinaryDataWidget, BinaryDataWidgetState};
 
@@ -43,22 +38,25 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Success. Show terminal ui.");
 
     // Terminal initialization
-    enable_raw_mode()?;
+    crossterm::terminal::enable_raw_mode()?;
     let mut stdout = std::io::stdout();
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    crossterm::execute!(
+        stdout,
+        crossterm::terminal::EnterAlternateScreen,
+        crossterm::event::EnableMouseCapture
+    )?;
+    let mut terminal = Terminal::new(CrosstermBackend::new(stdout))?;
 
     // App
     let app = App::new(&data);
     let res = run_app(&mut terminal, app);
 
     // restore terminal
-    disable_raw_mode()?;
-    execute!(
+    crossterm::terminal::disable_raw_mode()?;
+    crossterm::execute!(
         terminal.backend_mut(),
-        LeaveAlternateScreen,
-        DisableMouseCapture
+        crossterm::terminal::LeaveAlternateScreen,
+        crossterm::event::DisableMouseCapture
     )?;
     terminal.show_cursor()?;
 
@@ -109,7 +107,7 @@ enum Update {
 
 /// Returns true when the widget should be updated
 fn handle_events(app: &mut App, area: Rect) -> std::io::Result<Update> {
-    match event::read()? {
+    match crossterm::event::read()? {
         Event::Key(key) => match key.code {
             KeyCode::Char('q') => return Ok(Update::Quit),
             KeyCode::Esc => app.state.select(None),
@@ -124,9 +122,9 @@ fn handle_events(app: &mut App, area: Rect) -> std::io::Result<Update> {
             _ => return Ok(Update::Skip),
         },
         Event::Mouse(event) => match event.kind {
-            event::MouseEventKind::ScrollDown => app.state.scroll_down(1),
-            event::MouseEventKind::ScrollUp => app.state.scroll_up(1),
-            event::MouseEventKind::Down(_) => {
+            MouseEventKind::ScrollDown => app.state.scroll_down(1),
+            MouseEventKind::ScrollUp => app.state.scroll_up(1),
+            MouseEventKind::Down(_) => {
                 if let Some(address) = app.state.clicked_address(event.column, event.row) {
                     app.state.select(Some(address));
                 }
