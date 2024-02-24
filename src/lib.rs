@@ -10,7 +10,7 @@ The user interaction state (like the current selection) is stored in the [`Binar
 */
 
 use ratatui::buffer::Buffer;
-use ratatui::layout::{Margin, Rect};
+use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::widgets::block::BlockExt;
 use ratatui::widgets::{
@@ -173,7 +173,14 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
             let mut scrollbar_state = ScrollbarState::new(available_data_lines)
                 .position(start_line)
                 .viewport_content_length(available_height);
-            let scrollbar_area = full_area.inner(&Margin::new(0, 1));
+            let scrollbar_area = Rect {
+                // Inner height to be exactly as the content
+                y: area.y,
+                height: area.height,
+                // Outer width to stay on the right border
+                x: full_area.x,
+                width: full_area.width,
+            };
             scrollbar.render(scrollbar_area, buf, &mut scrollbar_state);
         }
 
