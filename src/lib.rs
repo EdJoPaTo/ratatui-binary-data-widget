@@ -170,9 +170,11 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 .begin_symbol(None)
                 .track_symbol(None)
                 .end_symbol(None);
-            let mut scrollbar_state = ScrollbarState::new(available_data_lines)
+            let overscroll_workaround = available_data_lines.saturating_sub(available_height);
+            let mut scrollbar_state = ScrollbarState::new(overscroll_workaround)
                 .position(start_line)
-                .viewport_content_length(available_height);
+                // Should be available_height but with the current overscroll workaround this looks nicer
+                .viewport_content_length(visible_lines);
             let scrollbar_area = Rect {
                 // Inner height to be exactly as the content
                 y: area.y,
