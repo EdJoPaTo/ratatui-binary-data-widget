@@ -1,4 +1,3 @@
-#![forbid(unsafe_code)]
 #![warn(clippy::pedantic, clippy::nursery)]
 #![allow(clippy::cast_possible_truncation)]
 
@@ -228,12 +227,18 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 // Char
                 {
                     let x = positions.x_char(i);
+                    let buffer_index = buf.index_of(x, y);
+                    #[allow(clippy::indexing_slicing)]
+                    let cell = &mut buf.content[buffer_index];
+                    cell.set_style(style);
                     if character == ' ' {
-                        buf.set_string(x, y, " ", style);
+                        cell.set_symbol(" ");
                     } else if character.is_ascii_graphic() {
-                        buf.set_string(x, y, character.to_string(), style);
+                        let array = [*value];
+                        let str = unsafe { core::str::from_utf8_unchecked(&array) };
+                        cell.set_symbol(str);
                     } else {
-                        buf.set_string(x, y, "·", style);
+                        cell.set_symbol("·");
                     }
                 }
             }
