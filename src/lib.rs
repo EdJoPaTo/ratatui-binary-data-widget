@@ -7,19 +7,23 @@ Widget built to show binary data.
 
 The main struct is the [`BinaryDataWidget`].
 The user interaction state (like the current selection) is stored in the [`BinaryDataWidgetState`].
+
+For the used colors see the sourcecode of [`color()`].
 */
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
-use ratatui::style::{Color, Modifier, Style};
+use ratatui::style::{Color, Style};
 use ratatui::widgets::block::BlockExt;
 use ratatui::widgets::{
     Block, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget,
 };
 
+mod color;
 mod render_positions;
 mod state;
 
+pub use color::color;
 use render_positions::RenderPositions;
 pub use state::State as BinaryDataWidgetState;
 
@@ -207,25 +211,11 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 let Some(value) = self.data.get(address) else {
                     break;
                 };
-                let char = *value as char;
-                let displayable = char.is_ascii_graphic();
-
+                let character = *value as char;
                 let style = if Some(address) == state.selected_address {
                     self.highlight_style
-                } else if *value == 0 {
-                    Style::new().fg(Color::DarkGray)
-                } else if *value == 0xff {
-                    Style::new().fg(Color::Blue).add_modifier(Modifier::BOLD)
-                } else if char.is_ascii_whitespace() {
-                    Style::new().fg(Color::Yellow).add_modifier(Modifier::BOLD)
-                } else if displayable {
-                    Style::new()
-                        .fg(Color::LightGreen)
-                        .add_modifier(Modifier::BOLD)
-                } else if char.is_ascii_control() {
-                    Style::new().fg(Color::Red).add_modifier(Modifier::BOLD)
                 } else {
-                    Style::new()
+                    color::color(character)
                 };
 
                 // Hex
@@ -238,8 +228,8 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 // Char
                 {
                     let x = positions.x_char(i);
-                    if displayable {
-                        buf.set_string(x, y, char.to_string(), style);
+                    if character.is_ascii_graphic() {
+                        buf.set_string(x, y, character.to_string(), style);
                     } else {
                         buf.set_string(x, y, "·", style);
                     }
