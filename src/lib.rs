@@ -7,7 +7,7 @@ Widget built to show binary data.
 The main struct is the [`BinaryDataWidget`].
 The user interaction state (like the current selection) is stored in the [`BinaryDataWidgetState`].
 
-For the used colors see the sourcecode of [`color()`].
+For the used colors see the source code of [`color()`].
 */
 
 use ratatui::buffer::Buffer;
