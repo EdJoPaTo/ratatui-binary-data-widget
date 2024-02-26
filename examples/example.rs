@@ -43,15 +43,15 @@ impl<'a> App<'a> {
     }
 
     fn on_event(&mut self, event: &Event) -> Update {
-        match event {
+        let change = match event {
             Event::Key(key) => match key.code {
                 KeyCode::Char('q') => return Update::Quit,
                 KeyCode::Esc => self.state.select_address(None),
                 KeyCode::Home if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                    self.state.select_address(Some(0));
+                    self.state.select_address(Some(0))
                 }
                 KeyCode::End if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                    self.state.select_address(Some(usize::MAX));
+                    self.state.select_address(Some(usize::MAX))
                 }
                 KeyCode::Home => self.state.select_first_in_row(),
                 KeyCode::End => self.state.select_last_in_row(),
@@ -68,15 +68,21 @@ impl<'a> App<'a> {
                 MouseEventKind::ScrollUp => self.state.scroll_up(1),
                 MouseEventKind::Down(_) => {
                     if let Some(address) = self.state.clicked_address(event.column, event.row) {
-                        self.state.select_address(Some(address));
+                        self.state.select_address(Some(address))
+                    } else {
+                        false
                     }
                 }
                 _ => return Update::Skip,
             },
             Event::Resize(_, _) => return Update::Redraw,
             _ => return Update::Skip,
+        };
+        if change {
+            Update::Redraw
+        } else {
+            Update::Skip
         }
-        Update::Redraw
     }
 
     fn draw(&mut self, frame: &mut Frame) {

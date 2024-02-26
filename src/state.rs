@@ -30,9 +30,14 @@ impl State {
         self.selected_address
     }
 
-    pub fn select_address(&mut self, address: Option<usize>) {
-        self.selected_address = address;
+    /// Select the given address.
+    ///
+    /// Returns `true` when the selection changed.
+    pub fn select_address(&mut self, address: Option<usize>) -> bool {
         self.ensure_selected_in_view_on_next_render = true;
+        let changed = self.selected_address != address;
+        self.selected_address = address;
+        changed
     }
 
     /// Returns the amount of addresses shown per row on last render
@@ -42,15 +47,19 @@ impl State {
     }
 
     /// Handles the Home key.
-    pub fn select_first_in_row(&mut self) {
+    ///
+    /// Returns `true` when the selection changed.
+    pub fn select_first_in_row(&mut self) -> bool {
         self.select_address(Some(self.selected_address.map_or(0, |selected| {
             let per_row = self.last_per_row();
             selected.saturating_div(per_row).saturating_mul(per_row)
-        })));
+        })))
     }
 
     /// Handles the End key.
-    pub fn select_last_in_row(&mut self) {
+    ///
+    /// Returns `true` when the selection changed.
+    pub fn select_last_in_row(&mut self) -> bool {
         let per_row = self.last_per_row();
         let last_in_row = per_row.saturating_sub(1);
         self.select_address(Some(self.selected_address.map_or(
@@ -61,52 +70,69 @@ impl State {
                     .saturating_mul(per_row)
                     .saturating_add(last_in_row)
             },
-        )));
+        )))
     }
 
     /// Handles the up arrow key.
-    pub fn key_up(&mut self) {
+    ///
+    /// Returns `true` when the selection changed.
+    pub fn key_up(&mut self) -> bool {
         self.select_address(Some(self.selected_address.map_or(usize::MAX, |selected| {
             let per_row = self.last_per_row();
             selected.saturating_sub(per_row)
-        })));
+        })))
     }
 
     /// Handles the down arrow key.
-    pub fn key_down(&mut self) {
+    ///
+    /// Always returns `true` as it can not determine whether the selection changed as the actual change is determined on render.
+    pub fn key_down(&mut self) -> bool {
         self.select_address(Some(self.selected_address.map_or(0, |selected| {
             let per_row = self.last_per_row();
             selected.saturating_add(per_row)
-        })));
+        })))
     }
 
     /// Handles the left arrow key.
-    pub fn key_left(&mut self) {
+    ///
+    /// Returns `true` when the selection changed.
+    pub fn key_left(&mut self) -> bool {
         self.select_address(Some(
             self.selected_address
                 .map_or(usize::MAX, |selected| selected.saturating_sub(1)),
-        ));
+        ))
     }
 
     /// Handles the right arrow key.
-    pub fn key_right(&mut self) {
+    ///
+    /// Always returns `true` as it can not determine whether the selection changed as the actual change is determined on render.
+    pub fn key_right(&mut self) -> bool {
         self.select_address(Some(
             self.selected_address
                 .map_or(0, |selected| selected.saturating_add(1)),
-        ));
+        ))
     }
 
     /// Scroll the specified amount of lines up
-    pub fn scroll_up(&mut self, lines: usize) {
+    ///
+    /// Returns `true` when the offset changed
+    /// Returns `false` when the scrolling has reached the top.
+    pub fn scroll_up(&mut self, lines: usize) -> bool {
+        let before = self.offset_address;
         self.offset_address = self
             .offset_address
             .saturating_sub(lines.saturating_mul(self.last_per_row()));
+        before != self.offset_address
     }
     /// Scroll the specified amount of lines down
-    pub fn scroll_down(&mut self, lines: usize) {
+    ///
+    /// In contrast to [`scroll_up()`](Self::scroll_up) this can not return whether the view position changed or not as the actual change is determined on render.
+    /// Always returns `true`.
+    pub fn scroll_down(&mut self, lines: usize) -> bool {
         self.offset_address = self
             .offset_address
             .saturating_add(lines.saturating_mul(self.last_per_row()));
+        true
     }
 
     /// Get the address on the given display position of last render
