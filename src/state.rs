@@ -33,11 +33,6 @@ impl State {
     pub fn select(&mut self, address: Option<usize>) {
         self.selected_address = address;
         self.ensure_selected_in_view_on_next_render = true;
-
-        // TODO: ListState does this. Is this relevant?
-        if self.selected_address.is_none() {
-            self.offset_address = 0;
-        }
     }
 
     /// Handles the up arrow key.
