@@ -41,6 +41,29 @@ impl State {
             .map_or(8, |positions| usize::from(positions.per_row))
     }
 
+    /// Handles the Home key.
+    pub fn select_first_in_row(&mut self) {
+        self.select_address(Some(self.selected_address.map_or(0, |selected| {
+            let per_row = self.last_per_row();
+            selected.saturating_div(per_row).saturating_mul(per_row)
+        })));
+    }
+
+    /// Handles the End key.
+    pub fn select_last_in_row(&mut self) {
+        let per_row = self.last_per_row();
+        let last_in_row = per_row.saturating_sub(1);
+        self.select_address(Some(self.selected_address.map_or(
+            last_in_row,
+            |selected| {
+                selected
+                    .saturating_div(per_row)
+                    .saturating_mul(per_row)
+                    .saturating_add(last_in_row)
+            },
+        )));
+    }
+
     /// Handles the up arrow key.
     pub fn key_up(&mut self) {
         self.select_address(Some(self.selected_address.map_or(usize::MAX, |selected| {

@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-use crossterm::event::{Event, KeyCode, MouseEventKind};
+use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind};
 use ratatui::backend::{Backend, CrosstermBackend};
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
@@ -44,8 +44,14 @@ impl<'a> App<'a> {
             Event::Key(key) => match key.code {
                 KeyCode::Char('q') => return Update::Quit,
                 KeyCode::Esc => self.state.select_address(None),
-                KeyCode::Home => self.state.select_address(Some(0)),
-                KeyCode::End => self.state.select_address(Some(usize::MAX)),
+                KeyCode::Home if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                    self.state.select_address(Some(0));
+                }
+                KeyCode::End if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                    self.state.select_address(Some(usize::MAX));
+                }
+                KeyCode::Home => self.state.select_first_in_row(),
+                KeyCode::End => self.state.select_last_in_row(),
                 KeyCode::Left => self.state.key_left(),
                 KeyCode::Right => self.state.key_right(),
                 KeyCode::Down => self.state.key_down(),
