@@ -214,6 +214,8 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                     self.highlight_style
                 } else if *value == 0 {
                     Style::new().fg(Color::DarkGray)
+                } else if *value == 0xff {
+                    Style::new().fg(Color::Blue).add_modifier(Modifier::BOLD)
                 } else if char.is_ascii_whitespace() {
                     Style::new().fg(Color::Yellow).add_modifier(Modifier::BOLD)
                 } else if displayable {
