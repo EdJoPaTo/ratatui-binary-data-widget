@@ -43,9 +43,9 @@ impl<'a> App<'a> {
         match event {
             Event::Key(key) => match key.code {
                 KeyCode::Char('q') => return Update::Quit,
-                KeyCode::Esc => self.state.select(None),
-                KeyCode::Home => self.state.select(Some(0)),
-                KeyCode::End => self.state.select(Some(usize::MAX)),
+                KeyCode::Esc => self.state.select_address(None),
+                KeyCode::Home => self.state.select_address(Some(0)),
+                KeyCode::End => self.state.select_address(Some(usize::MAX)),
                 KeyCode::Left => self.state.key_left(),
                 KeyCode::Right => self.state.key_right(),
                 KeyCode::Down => self.state.key_down(),
@@ -59,7 +59,7 @@ impl<'a> App<'a> {
                 MouseEventKind::ScrollUp => self.state.scroll_up(1),
                 MouseEventKind::Down(_) => {
                     if let Some(address) = self.state.clicked_address(event.column, event.row) {
-                        self.state.select(Some(address));
+                        self.state.select_address(Some(address));
                     }
                 }
                 _ => return Update::Skip,
@@ -83,7 +83,7 @@ impl<'a> App<'a> {
             );
         frame.render_stateful_widget(widget, area, &mut self.state);
 
-        if let Some(selected) = self.state.selected() {
+        if let Some(selected) = self.state.selected_address() {
             let meta = format!("Selected: {selected:x}");
             let meta_area = Rect::new(1, area.height - 1, area.width - 1, 1);
             frame.render_widget(Span::raw(meta), meta_area);

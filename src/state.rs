@@ -21,16 +21,16 @@ impl State {
     }
 
     #[must_use]
-    pub const fn get_offset(&self) -> usize {
+    pub const fn get_offset_address(&self) -> usize {
         self.offset_address
     }
 
     #[must_use]
-    pub const fn selected(&self) -> Option<usize> {
+    pub const fn selected_address(&self) -> Option<usize> {
         self.selected_address
     }
 
-    pub fn select(&mut self, address: Option<usize>) {
+    pub fn select_address(&mut self, address: Option<usize>) {
         self.selected_address = address;
         self.ensure_selected_in_view_on_next_render = true;
     }
@@ -43,38 +43,34 @@ impl State {
 
     /// Handles the up arrow key.
     pub fn key_up(&mut self) {
-        self.selected_address = Some(self.selected_address.map_or(usize::MAX, |selected| {
+        self.select_address(Some(self.selected_address.map_or(usize::MAX, |selected| {
             let per_row = self.last_per_row();
             selected.saturating_sub(per_row)
-        }));
-        self.ensure_selected_in_view_on_next_render = true;
+        })));
     }
 
     /// Handles the down arrow key.
     pub fn key_down(&mut self) {
-        self.selected_address = Some(self.selected_address.map_or(0, |selected| {
+        self.select_address(Some(self.selected_address.map_or(0, |selected| {
             let per_row = self.last_per_row();
             selected.saturating_add(per_row)
-        }));
-        self.ensure_selected_in_view_on_next_render = true;
+        })));
     }
 
     /// Handles the left arrow key.
     pub fn key_left(&mut self) {
-        self.selected_address = Some(
+        self.select_address(Some(
             self.selected_address
                 .map_or(usize::MAX, |selected| selected.saturating_sub(1)),
-        );
-        self.ensure_selected_in_view_on_next_render = true;
+        ));
     }
 
     /// Handles the right arrow key.
     pub fn key_right(&mut self) {
-        self.selected_address = Some(
+        self.select_address(Some(
             self.selected_address
                 .map_or(0, |selected| selected.saturating_add(1)),
-        );
-        self.ensure_selected_in_view_on_next_render = true;
+        ));
     }
 
     /// Scroll the specified amount of lines up
