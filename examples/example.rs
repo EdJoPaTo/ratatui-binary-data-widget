@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::fmt::Write;
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, Instant};
@@ -22,6 +23,7 @@ enum Update {
 struct App<'a> {
     data: &'a [u8],
     last_area: Rect,
+    render_times: Vec<Duration>,
     state: BinaryDataWidgetState,
 }
 
@@ -35,6 +37,7 @@ impl<'a> App<'a> {
                 width: 0,
                 height: 0,
             },
+            render_times: Vec::new(),
             state: BinaryDataWidgetState::new(),
         }
     }
@@ -87,13 +90,22 @@ impl<'a> App<'a> {
                     .bg(Color::LightGreen)
                     .add_modifier(Modifier::BOLD),
             );
+        let instant = Instant::now();
         frame.render_stateful_widget(widget, area, &mut self.state);
+        self.render_times.push(instant.elapsed());
 
+        #[allow(clippy::cast_precision_loss)]
+        let average_render_time = self
+            .render_times
+            .iter()
+            .sum::<Duration>()
+            .div_f64(self.render_times.len() as f64);
+        let mut meta = format!("Avg render time: {average_render_time:?}");
         if let Some(selected) = self.state.selected_address() {
-            let meta = format!("Selected: {selected:x}");
-            let meta_area = Rect::new(1, area.height - 1, area.width - 1, 1);
-            frame.render_widget(Span::raw(meta), meta_area);
+            _ = write!(meta, " Selected: {selected:x}");
         }
+        let meta_area = Rect::new(1, area.height - 1, area.width - 1, 1);
+        frame.render_widget(Span::raw(meta), meta_area);
     }
 }
 
@@ -139,11 +151,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Result<()> {
+    const INTERVAL: Duration = Duration::from_millis(200); // 5 FPS
     const DEBOUNCE: Duration = Duration::from_millis(20); // 50 FPS
     terminal.draw(|frame| app.draw(frame))?;
     let mut debounce: Option<Instant> = None;
+    let mut last_render = Instant::now();
     loop {
-        let timeout = debounce.map_or(DEBOUNCE, |since| DEBOUNCE.saturating_sub(since.elapsed()));
+        let timeout = debounce.map_or(INTERVAL, |since| DEBOUNCE.saturating_sub(since.elapsed()));
         if crossterm::event::poll(timeout)? {
             match app.on_event(&crossterm::event::read()?) {
                 Update::Quit => return Ok(()),
@@ -153,9 +167,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
                 Update::Skip => {}
             }
         }
-        if debounce.is_some_and(|since| since.elapsed() > DEBOUNCE) {
+        if debounce.map_or_else(
+            || last_render.elapsed() > INTERVAL,
+            |since| since.elapsed() > DEBOUNCE,
+        ) {
             terminal.draw(|frame| app.draw(frame))?;
             debounce = None;
+            last_render = Instant::now();
         }
     }
 }
