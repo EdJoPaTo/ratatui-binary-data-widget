@@ -228,7 +228,9 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 // Char
                 {
                     let x = positions.x_char(i);
-                    if character.is_ascii_graphic() {
+                    if character == ' ' {
+                        buf.set_string(x, y, " ", style);
+                    } else if character.is_ascii_graphic() {
                         buf.set_string(x, y, character.to_string(), style);
                     } else {
                         buf.set_string(x, y, "·", style);
