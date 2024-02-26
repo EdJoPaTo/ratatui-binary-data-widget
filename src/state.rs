@@ -35,12 +35,16 @@ impl State {
         self.ensure_selected_in_view_on_next_render = true;
     }
 
+    /// Returns the amount of addresses shown per row on last render
+    fn last_per_row(&self) -> usize {
+        self.last_render_positions
+            .map_or(8, |positions| usize::from(positions.per_row))
+    }
+
     /// Handles the up arrow key.
     pub fn key_up(&mut self) {
         self.selected_address = Some(self.selected_address.map_or(usize::MAX, |selected| {
-            let per_row = self
-                .last_render_positions
-                .map_or(8, |positions| positions.per_row as usize);
+            let per_row = self.last_per_row();
             selected.saturating_sub(per_row)
         }));
         self.ensure_selected_in_view_on_next_render = true;
@@ -49,9 +53,7 @@ impl State {
     /// Handles the down arrow key.
     pub fn key_down(&mut self) {
         self.selected_address = Some(self.selected_address.map_or(0, |selected| {
-            let per_row = self
-                .last_render_positions
-                .map_or(8, |positions| positions.per_row as usize);
+            let per_row = self.last_per_row();
             selected.saturating_add(per_row)
         }));
         self.ensure_selected_in_view_on_next_render = true;
@@ -77,21 +79,15 @@ impl State {
 
     /// Scroll the specified amount of lines up
     pub fn scroll_up(&mut self, lines: usize) {
-        let per_row = self
-            .last_render_positions
-            .map_or(8, |positions| positions.per_row as usize);
         self.offset_address = self
             .offset_address
-            .saturating_sub(lines.saturating_mul(per_row));
+            .saturating_sub(lines.saturating_mul(self.last_per_row()));
     }
     /// Scroll the specified amount of lines down
     pub fn scroll_down(&mut self, lines: usize) {
-        let per_row = self
-            .last_render_positions
-            .map_or(8, |positions| positions.per_row as usize);
         self.offset_address = self
             .offset_address
-            .saturating_add(lines.saturating_mul(per_row));
+            .saturating_add(lines.saturating_mul(self.last_per_row()));
     }
 
     /// Get the address on the given display position of last render
