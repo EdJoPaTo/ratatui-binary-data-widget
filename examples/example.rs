@@ -13,8 +13,15 @@ use ratatui::{Frame, Terminal};
 
 use ratatui_binary_data_widget::{BinaryDataWidget, BinaryDataWidgetState};
 
+enum Update {
+    Quit,
+    Redraw,
+    Skip,
+}
+
 struct App<'a> {
     data: &'a [u8],
+    last_area: Rect,
     state: BinaryDataWidgetState,
 }
 
@@ -22,12 +29,50 @@ impl<'a> App<'a> {
     const fn new(data: &'a [u8]) -> Self {
         Self {
             data,
+            last_area: Rect {
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+            },
             state: BinaryDataWidgetState::new(),
         }
     }
 
+    fn on_event(&mut self, event: &Event) -> Update {
+        match event {
+            Event::Key(key) => match key.code {
+                KeyCode::Char('q') => return Update::Quit,
+                KeyCode::Esc => self.state.select(None),
+                KeyCode::Home => self.state.select(Some(0)),
+                KeyCode::End => self.state.select(Some(usize::MAX)),
+                KeyCode::Left => self.state.key_left(),
+                KeyCode::Right => self.state.key_right(),
+                KeyCode::Down => self.state.key_down(),
+                KeyCode::Up => self.state.key_up(),
+                KeyCode::PageDown => self.state.scroll_down((self.last_area.height / 2) as usize),
+                KeyCode::PageUp => self.state.scroll_up((self.last_area.height / 2) as usize),
+                _ => return Update::Skip,
+            },
+            Event::Mouse(event) => match event.kind {
+                MouseEventKind::ScrollDown => self.state.scroll_down(1),
+                MouseEventKind::ScrollUp => self.state.scroll_up(1),
+                MouseEventKind::Down(_) => {
+                    if let Some(address) = self.state.clicked_address(event.column, event.row) {
+                        self.state.select(Some(address));
+                    }
+                }
+                _ => return Update::Skip,
+            },
+            Event::Resize(_, _) => return Update::Redraw,
+            _ => return Update::Skip,
+        }
+        Update::Redraw
+    }
+
     fn draw(&mut self, frame: &mut Frame) {
         let area = frame.size();
+        self.last_area = area;
         let widget = BinaryDataWidget::new(self.data)
             .block(Block::bordered().title("Binary Data Widget"))
             .highlight_style(
@@ -94,8 +139,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
     loop {
         let timeout = debounce.map_or(DEBOUNCE, |since| DEBOUNCE.saturating_sub(since.elapsed()));
         if crossterm::event::poll(timeout)? {
-            let area = terminal.size().expect("Should have a size");
-            match handle_events(&mut app, area)? {
+            match app.on_event(&crossterm::event::read()?) {
                 Update::Quit => return Ok(()),
                 Update::Redraw => {
                     debounce.get_or_insert_with(Instant::now);
@@ -103,46 +147,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Res
                 Update::Skip => {}
             }
         }
-        if debounce.is_some_and(|o| o.elapsed() > DEBOUNCE) {
+        if debounce.is_some_and(|since| since.elapsed() > DEBOUNCE) {
             terminal.draw(|frame| app.draw(frame))?;
             debounce = None;
         }
     }
-}
-
-enum Update {
-    Quit,
-    Redraw,
-    Skip,
-}
-
-fn handle_events(app: &mut App, area: Rect) -> std::io::Result<Update> {
-    match crossterm::event::read()? {
-        Event::Key(key) => match key.code {
-            KeyCode::Char('q') => return Ok(Update::Quit),
-            KeyCode::Esc => app.state.select(None),
-            KeyCode::Home => app.state.select(Some(0)),
-            KeyCode::End => app.state.select(Some(usize::MAX)),
-            KeyCode::Left => app.state.key_left(),
-            KeyCode::Right => app.state.key_right(),
-            KeyCode::Down => app.state.key_down(),
-            KeyCode::Up => app.state.key_up(),
-            KeyCode::PageDown => app.state.scroll_down((area.height / 2) as usize),
-            KeyCode::PageUp => app.state.scroll_up((area.height / 2) as usize),
-            _ => return Ok(Update::Skip),
-        },
-        Event::Mouse(event) => match event.kind {
-            MouseEventKind::ScrollDown => app.state.scroll_down(1),
-            MouseEventKind::ScrollUp => app.state.scroll_up(1),
-            MouseEventKind::Down(_) => {
-                if let Some(address) = app.state.clicked_address(event.column, event.row) {
-                    app.state.select(Some(address));
-                }
-            }
-            _ => return Ok(Update::Skip),
-        },
-        Event::Resize(_, _) => return Ok(Update::Redraw),
-        _ => return Ok(Update::Skip),
-    }
-    Ok(Update::Redraw)
 }
