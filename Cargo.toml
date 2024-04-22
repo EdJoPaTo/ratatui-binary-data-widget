@@ -9,7 +9,10 @@ edition = "2021"
 keywords = ["tui", "terminal", "binary", "widget"]
 categories = ["command-line-interface"]
 include = ["src/**/*", "README.md"]
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lints.clippy]
+pedantic = "warn"
+nursery = "warn"
 
 [dependencies]
 # ratatui = { path = "/home/edjopato/git/hub/EdJoPaTo-fork/public/ratatui" }

@@ -20,7 +20,11 @@ impl RenderPositions {
         }
 
         let biggest_address = data_length.saturating_sub(1);
-        #[allow(clippy::cast_precision_loss, clippy::cast_sign_loss)]
+        #[allow(
+            clippy::cast_possible_truncation,
+            clippy::cast_precision_loss,
+            clippy::cast_sign_loss
+        )]
         let address_width = (biggest_address as f32).log(16.0).ceil() as u16;
         let data_width = inner_area
             .width

@@ -1,6 +1,3 @@
-#![warn(clippy::pedantic, clippy::nursery)]
-#![allow(clippy::cast_possible_truncation)]
-
 /*!
 Widget built to show binary data.
 
@@ -190,6 +187,7 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
         }
 
         let address_width = address_width as usize;
+        #[allow(clippy::cast_possible_truncation)]
         let visible_lines = visible_lines as u16;
         let x = area.left();
 
