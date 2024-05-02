@@ -3,6 +3,7 @@ use ratatui::layout::Rect;
 #[derive(Debug, Clone, Copy)]
 pub struct RenderPositions {
     pub inner_area: Rect,
+    pub biggest_address: usize,
     pub address_width: u16,
     pub per_row: u16,
     pub available_data_lines: usize,
@@ -57,6 +58,7 @@ impl RenderPositions {
 
         Some(Self {
             inner_area,
+            biggest_address,
             address_width,
             per_row,
             available_data_lines,

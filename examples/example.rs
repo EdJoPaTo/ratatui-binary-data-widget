@@ -11,7 +11,6 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::Span;
 use ratatui::widgets::Block;
 use ratatui::{Frame, Terminal};
-
 use ratatui_binary_data_widget::{BinaryDataWidget, BinaryDataWidgetState};
 
 enum Update {

@@ -35,6 +35,14 @@ impl State {
     /// Returns `true` when the selection changed.
     pub fn select_address(&mut self, address: Option<usize>) -> bool {
         self.ensure_selected_in_view_on_next_render = true;
+
+        // Limit address to what was possible to select on last render
+        let address = if let (Some(selected), Some(last)) = (address, self.last_render_positions) {
+            Some(selected.min(last.biggest_address))
+        } else {
+            address
+        };
+
         let changed = self.selected_address != address;
         self.selected_address = address;
         changed
@@ -85,7 +93,7 @@ impl State {
 
     /// Handles the down arrow key.
     ///
-    /// Always returns `true` as it can not determine whether the selection changed as the actual change is determined on render.
+    /// Returns `true` when the selection changed.
     pub fn key_down(&mut self) -> bool {
         self.select_address(Some(self.selected_address.map_or(0, |selected| {
             let per_row = self.last_per_row();
@@ -105,7 +113,7 @@ impl State {
 
     /// Handles the right arrow key.
     ///
-    /// Always returns `true` as it can not determine whether the selection changed as the actual change is determined on render.
+    /// Returns `true` when the selection changed.
     pub fn key_right(&mut self) -> bool {
         self.select_address(Some(
             self.selected_address
@@ -129,10 +137,15 @@ impl State {
     /// In contrast to [`scroll_up()`](Self::scroll_up) this can not return whether the view position changed or not as the actual change is determined on render.
     /// Always returns `true`.
     pub fn scroll_down(&mut self, lines: usize) -> bool {
+        let before = self.offset_address;
+        let last_biggest_address = self
+            .last_render_positions
+            .map_or(usize::MAX, |positions| positions.biggest_address);
         self.offset_address = self
             .offset_address
-            .saturating_add(lines.saturating_mul(self.last_per_row()));
-        true
+            .saturating_add(lines.saturating_mul(self.last_per_row()))
+            .min(last_biggest_address);
+        before != self.offset_address
     }
 
     /// Get the address on the given display position of last render
