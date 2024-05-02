@@ -24,7 +24,6 @@ use render_positions::RenderPositions;
 pub use state::State as BinaryDataWidgetState;
 
 /// A widget to render binary data.
-///
 //
 /// # Example
 ///
@@ -106,13 +105,13 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
     type State = BinaryDataWidgetState;
 
     #[allow(clippy::too_many_lines)]
-    fn render(self, full_area: Rect, buf: &mut Buffer, state: &mut Self::State) {
-        buf.set_style(full_area, self.style);
+    fn render(self, full_area: Rect, buffer: &mut Buffer, state: &mut Self::State) {
+        buffer.set_style(full_area, self.style);
 
         // Get the inner area inside a possible block, otherwise use the full area
         let area = self.block.map_or(full_area, |block| {
             let inner_area = block.inner(full_area);
-            block.render(full_area, buf);
+            block.render(full_area, buffer);
             inner_area
         });
 
@@ -183,7 +182,7 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 x: full_area.x,
                 width: full_area.width,
             };
-            scrollbar.render(scrollbar_area, buf, &mut scrollbar_state);
+            scrollbar.render(scrollbar_area, buffer, &mut scrollbar_state);
         }
 
         let address_width = address_width as usize;
@@ -201,7 +200,7 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 .saturating_mul(per_row as usize);
 
             let address_text = format!("{offset_address:>address_width$x}: ");
-            buf.set_stringn(x, y, address_text, area.width as usize, ADDRESS_STYLE);
+            buffer.set_stringn(x, y, address_text, area.width as usize, ADDRESS_STYLE);
 
             for i in 0..per_row {
                 let address = offset_address.saturating_add(i as usize);
@@ -219,15 +218,13 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 {
                     let x = positions.x_hex(i);
                     let text = format!("{value:>2x}");
-                    buf.set_string(x, y, text, style);
+                    buffer.set_string(x, y, text, style);
                 }
 
                 // Char
                 {
                     let x = positions.x_char(i);
-                    let buffer_index = buf.index_of(x, y);
-                    #[allow(clippy::indexing_slicing)]
-                    let cell = &mut buf.content[buffer_index];
+                    let cell = buffer.get_mut(x, y);
                     cell.set_style(style);
                     if character == ' ' {
                         cell.set_symbol(" ");
@@ -245,8 +242,8 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
 }
 
 impl<'a> Widget for BinaryDataWidget<'a> {
-    fn render(self, area: Rect, buf: &mut Buffer) {
+    fn render(self, area: Rect, buffer: &mut Buffer) {
         let mut state = BinaryDataWidgetState::new();
-        StatefulWidget::render(self, area, buf, &mut state);
+        StatefulWidget::render(self, area, buffer, &mut state);
     }
 }
