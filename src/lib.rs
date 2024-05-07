@@ -15,13 +15,13 @@ use ratatui::widgets::{
     Block, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget,
 };
 
+pub use self::color::color;
+use self::render_positions::RenderPositions;
+pub use self::state::State as BinaryDataWidgetState;
+
 mod color;
 mod render_positions;
 mod state;
-
-pub use color::color;
-use render_positions::RenderPositions;
-pub use state::State as BinaryDataWidgetState;
 
 /// A widget to render binary data.
 //

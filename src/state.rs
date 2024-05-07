@@ -132,6 +132,7 @@ impl State {
             .saturating_sub(lines.saturating_mul(self.last_per_row()));
         before != self.offset_address
     }
+
     /// Scroll the specified amount of lines down
     ///
     /// In contrast to [`scroll_up()`](Self::scroll_up) this can not return whether the view position changed or not as the actual change is determined on render.
