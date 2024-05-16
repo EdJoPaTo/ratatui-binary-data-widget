@@ -247,3 +247,58 @@ impl<'a> Widget for BinaryDataWidget<'a> {
         StatefulWidget::render(self, area, buffer, &mut state);
     }
 }
+
+#[cfg(test)]
+mod render_tests {
+    use super::*;
+
+    fn render(
+        width: u16,
+        height: u16,
+        data: &[u8],
+        mut state: BinaryDataWidgetState,
+        expected: &Buffer,
+    ) {
+        let area = Rect::new(0, 0, width, height);
+        let mut buffer = Buffer::empty(area);
+
+        let widget = BinaryDataWidget::new(data);
+        StatefulWidget::render(widget, area, &mut buffer, &mut state);
+
+        // Compare without styles
+        buffer.set_style(area, Style::reset());
+        assert_eq!(&buffer, expected);
+    }
+
+    #[test]
+    fn numbers() {
+        let data: Vec<u8> = (0..=0x12).collect();
+        let state = BinaryDataWidgetState::new();
+        let expected = Buffer::with_lines([
+            " 0:  0 1  2 3 ···· ",
+            " 4:  4 5  6 7 ···· ",
+            " 8:  8 9  a b ···· ",
+            " c:  c d  e f ···· ",
+            "10: 1011 12   ···  ",
+            "                   ",
+        ]);
+        render(19, 6, &data, state, &expected);
+    }
+
+    #[test]
+    fn characters() {
+        let data: Vec<u8> = ('A'..='Z').map(|char| char as u8).collect();
+        let state = BinaryDataWidgetState::new();
+        let expected = Buffer::with_lines([
+            " 0: 4142 4344 ABCD ",
+            " 4: 4546 4748 EFGH ",
+            " 8: 494a 4b4c IJKL ",
+            " c: 4d4e 4f50 MNOP ",
+            "10: 5152 5354 QRST ",
+            "14: 5556 5758 UVWX ",
+            "18: 595a      YZ   ",
+            "                   ",
+        ]);
+        render(19, 8, &data, state, &expected);
+    }
+}
