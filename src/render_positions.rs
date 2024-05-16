@@ -78,7 +78,7 @@ impl RenderPositions {
         self.offset_x_char.saturating_add(index_on_row)
     }
 
-    pub fn clicked_address(&self, offset_address: usize, column: u16, row: u16) -> usize {
+    pub fn address_at(&self, offset_address: usize, column: u16, row: u16) -> usize {
         let row_offset = row.saturating_sub(self.inner_area.top());
         let offset_address = offset_address
             .saturating_add((row_offset as usize).saturating_mul(self.per_row as usize));

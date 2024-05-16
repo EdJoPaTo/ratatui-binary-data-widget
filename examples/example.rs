@@ -65,13 +65,7 @@ impl<'a> App<'a> {
             Event::Mouse(event) => match event.kind {
                 MouseEventKind::ScrollDown => self.state.scroll_down(1),
                 MouseEventKind::ScrollUp => self.state.scroll_up(1),
-                MouseEventKind::Down(_) => {
-                    if let Some(address) = self.state.clicked_address(event.column, event.row) {
-                        self.state.select_address(Some(address))
-                    } else {
-                        false
-                    }
-                }
+                MouseEventKind::Down(_) => self.state.select_at(event.column, event.row),
                 _ => return Update::Skip,
             },
             Event::Resize(_, _) => return Update::Redraw,

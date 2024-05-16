@@ -154,7 +154,20 @@ impl State {
     pub fn clicked_address(&self, column: u16, row: u16) -> Option<usize> {
         let address = self
             .last_render_positions?
-            .clicked_address(self.offset_address, column, row);
+            .address_at(self.offset_address, column, row);
         Some(address)
+    }
+
+    /// Select the address on the given display position of last render.
+    /// Useful for mouse clicks.
+    ///
+    /// Returns `true` when the selection changed
+    pub fn select_at(&mut self, column: u16, row: u16) -> bool {
+        #[allow(clippy::option_if_let_else)]
+        if let Some(address) = self.clicked_address(column, row) {
+            self.select_address(Some(address))
+        } else {
+            false
+        }
     }
 }
