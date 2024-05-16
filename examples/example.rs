@@ -93,13 +93,20 @@ impl<'a> App<'a> {
         frame.render_stateful_widget(widget, area, &mut self.state);
         self.render_times.push(instant.elapsed());
 
+        while self.render_times.len() > 50 {
+            self.render_times.remove(0);
+        }
+
         #[allow(clippy::cast_precision_loss)]
         let average_render_time = self
             .render_times
             .iter()
             .sum::<Duration>()
             .div_f64(self.render_times.len() as f64);
-        let mut meta = format!("Avg render time: {average_render_time:?}");
+        let mut meta = format!(
+            "{} renders, avg render time: {average_render_time:?} (last 50 renders)",
+            frame.count()
+        );
         if let Some(selected) = self.state.selected_address() {
             _ = write!(meta, " Selected: {selected:x}");
         }
