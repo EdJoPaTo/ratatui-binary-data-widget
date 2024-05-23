@@ -1,5 +1,6 @@
 use ratatui::layout::Rect;
 
+#[must_use]
 #[derive(Debug, Clone, Copy)]
 pub struct RenderPositions {
     pub inner_area: Rect,
@@ -12,6 +13,7 @@ pub struct RenderPositions {
 }
 
 impl RenderPositions {
+    #[must_use]
     pub fn new(inner_area: Rect, data_length: usize) -> Option<Self> {
         const TWO_ADDRESSES_TAKE: u16 = 4 + 2 + 1; // binary + char + whitespace
         const CHAR_OFFSET_PER_TWO: u16 = 4 + 1;
@@ -67,6 +69,7 @@ impl RenderPositions {
         })
     }
 
+    #[must_use]
     pub const fn x_hex(&self, index_on_row: u16) -> u16 {
         let pair_index = index_on_row.saturating_div(2);
         self.offset_x_hex
@@ -74,10 +77,12 @@ impl RenderPositions {
             .saturating_add(pair_index)
     }
 
+    #[must_use]
     pub const fn x_char(&self, index_on_row: u16) -> u16 {
         self.offset_x_char.saturating_add(index_on_row)
     }
 
+    #[must_use]
     pub fn address_at(&self, offset_address: usize, column: u16, row: u16) -> usize {
         let row_offset = row.saturating_sub(self.inner_area.top());
         let offset_address = offset_address

@@ -1,6 +1,7 @@
 use crate::RenderPositions;
 
 /// Keeps the state of a [`BinaryDataWidget`](crate::BinaryDataWidget).
+#[must_use]
 #[derive(Debug, Default, Clone, Copy)]
 pub struct State {
     pub(super) ensure_selected_in_view_on_next_render: bool,
@@ -10,7 +11,6 @@ pub struct State {
 }
 
 impl State {
-    #[must_use]
     pub const fn new() -> Self {
         Self {
             ensure_selected_in_view_on_next_render: false,
@@ -49,6 +49,7 @@ impl State {
     }
 
     /// Returns the amount of addresses shown per row on last render
+    #[must_use]
     fn last_per_row(&self) -> usize {
         self.last_render_positions
             .map_or(8, |positions| usize::from(positions.per_row))

@@ -19,6 +19,7 @@ enum Update {
     Skip,
 }
 
+#[must_use]
 struct App<'a> {
     data: &'a [u8],
     last_area: Rect,
@@ -41,6 +42,7 @@ impl<'a> App<'a> {
         }
     }
 
+    #[must_use]
     fn on_event(&mut self, event: &Event) -> Update {
         let change = match event {
             Event::Key(key) => match key.code {

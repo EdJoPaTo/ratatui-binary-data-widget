@@ -47,6 +47,7 @@ mod state;
 /// })?;
 /// # Ok::<(), std::io::Error>(())
 /// ```
+#[must_use = "The widget is only useful when rendered"]
 #[derive(Debug, Clone)]
 pub struct BinaryDataWidget<'a> {
     data: &'a [u8],
@@ -61,7 +62,6 @@ pub struct BinaryDataWidget<'a> {
 
 impl<'a> BinaryDataWidget<'a> {
     /// Create a new `BinaryDataWidget`.
-    #[must_use]
     pub fn new(data: &'a [u8]) -> Self {
         Self {
             data,
@@ -72,19 +72,16 @@ impl<'a> BinaryDataWidget<'a> {
     }
 
     #[allow(clippy::missing_const_for_fn)]
-    #[must_use]
     pub fn block(mut self, block: Block<'a>) -> Self {
         self.block = Some(block);
         self
     }
 
-    #[must_use]
     pub const fn style(mut self, style: Style) -> Self {
         self.style = style;
         self
     }
 
-    #[must_use]
     pub const fn highlight_style(mut self, style: Style) -> Self {
         self.highlight_style = style;
         self
