@@ -60,7 +60,7 @@ pub struct BinaryDataWidget<'a> {
 
 impl<'a> BinaryDataWidget<'a> {
     /// Create a new `BinaryDataWidget`.
-    pub fn new(data: &'a [u8]) -> Self {
+    pub const fn new(data: &'a [u8]) -> Self {
         Self {
             data,
             block: None,
