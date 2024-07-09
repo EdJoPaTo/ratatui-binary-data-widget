@@ -39,10 +39,8 @@ mod state;
 ///
 /// terminal.draw(|f| {
 ///     let area = f.size();
-///
-///     let widget = BinaryDataWidget::new(data)
-///         .block(Block::bordered().title("Binary Data Widget"));
-///
+///     let block = Block::bordered().title("Binary Data Widget");
+///     let widget = BinaryDataWidget::new(data).block(block);
 ///     f.render_stateful_widget(widget, area, &mut state);
 /// })?;
 /// # Ok::<(), std::io::Error>(())
