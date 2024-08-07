@@ -81,7 +81,7 @@ impl<'a> App<'a> {
     }
 
     fn draw(&mut self, frame: &mut Frame) {
-        let area = frame.size();
+        let area = frame.area();
         self.last_area = area;
         let widget = BinaryDataWidget::new(self.data)
             .block(Block::bordered().title("Binary Data Widget"))

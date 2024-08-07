@@ -6,7 +6,7 @@
 //! For the used colors see the source code of [`color()`].
 
 use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use ratatui::layout::{Position, Rect};
 use ratatui::style::{Color, Style};
 use ratatui::widgets::block::BlockExt as _;
 use ratatui::widgets::{
@@ -35,11 +35,10 @@ mod state;
 ///
 /// let data = b"Hello world!";
 ///
-/// terminal.draw(|f| {
-///     let area = f.size();
+/// terminal.draw(|frame| {
 ///     let block = Block::bordered().title("Binary Data Widget");
 ///     let widget = BinaryDataWidget::new(data).block(block);
-///     f.render_stateful_widget(widget, area, &mut state);
+///     frame.render_stateful_widget(widget, frame.area(), &mut state);
 /// })?;
 /// # Ok::<(), std::io::Error>(())
 /// ```
@@ -216,7 +215,7 @@ impl StatefulWidget for BinaryDataWidget<'_> {
                 // Char
                 {
                     let x = positions.x_char(i);
-                    let cell = buffer.get_mut(x, y);
+                    let cell = &mut buffer[Position { x, y }];
                     cell.set_style(style);
                     if character == ' ' {
                         cell.set_symbol(" ");
