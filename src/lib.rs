@@ -206,7 +206,7 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
                 let style = if Some(address) == state.selected_address {
                     self.highlight_style
                 } else {
-                    color::color(character)
+                    color(character)
                 };
 
                 // Hex
