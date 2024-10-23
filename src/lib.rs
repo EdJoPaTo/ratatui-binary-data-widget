@@ -96,7 +96,7 @@ impl<'a> BinaryDataWidget<'a> {
     }
 }
 
-impl<'a> StatefulWidget for BinaryDataWidget<'a> {
+impl StatefulWidget for BinaryDataWidget<'_> {
     type State = BinaryDataWidgetState;
 
     #[allow(clippy::too_many_lines)]
@@ -236,7 +236,7 @@ impl<'a> StatefulWidget for BinaryDataWidget<'a> {
     }
 }
 
-impl<'a> Widget for BinaryDataWidget<'a> {
+impl Widget for BinaryDataWidget<'_> {
     fn render(self, area: Rect, buffer: &mut Buffer) {
         let mut state = BinaryDataWidgetState::new();
         StatefulWidget::render(self, area, buffer, &mut state);
