@@ -121,7 +121,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Usage: optional argument - path to file to be read and displayed");
     println!("Otherwise the executable itself will be read.");
     let path = std::env::args_os()
-        .last()
+        .next_back()
         .expect("The executable itself should always be an argument");
     let path = Path::new(&path);
     println!("Read file: {path:?}");
