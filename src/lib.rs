@@ -10,7 +10,7 @@ For the used colors see the source code of [`color()`].
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
-use ratatui::widgets::block::BlockExt;
+use ratatui::widgets::block::BlockExt as _;
 use ratatui::widgets::{
     Block, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget,
 };
