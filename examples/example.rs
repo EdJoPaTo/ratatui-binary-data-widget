@@ -124,7 +124,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .next_back()
         .expect("The executable itself should always be an argument");
     let path = Path::new(&path);
-    println!("Read file: {path:?}");
+    println!("Read file: {}", path.display());
     let data = fs::read(path).expect("should be able to read the file");
     println!("Success. Show terminal ui.");
 
