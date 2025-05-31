@@ -29,7 +29,7 @@ crossterm = "0.27"
 ratatui = "0.26"
 
 [target.'cfg(target_family = "unix")'.dev-dependencies]
-pprof = { version = "0.14", features = ["criterion", "flamegraph"] }
+pprof = { version = "0.15", features = ["criterion", "flamegraph"] }
 
 [[bench]]
 name = "bench"
