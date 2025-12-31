@@ -73,11 +73,7 @@ impl<'a> App<'a> {
             Event::Resize(_, _) => return Update::Redraw,
             _ => return Update::Skip,
         };
-        if change {
-            Update::Redraw
-        } else {
-            Update::Skip
-        }
+        if change { Update::Redraw } else { Update::Skip }
     }
 
     fn draw(&mut self, frame: &mut Frame) {
@@ -99,7 +95,7 @@ impl<'a> App<'a> {
             self.render_times.remove(0);
         }
 
-        #[allow(clippy::cast_precision_loss)]
+        #[expect(clippy::cast_precision_loss)]
         let average_render_time = self
             .render_times
             .iter()
