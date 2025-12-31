@@ -23,7 +23,7 @@ impl RenderPositions {
         }
 
         let biggest_address = data_length.saturating_sub(1);
-        #[allow(
+        #[expect(
             clippy::cast_possible_truncation,
             clippy::cast_precision_loss,
             clippy::cast_sign_loss

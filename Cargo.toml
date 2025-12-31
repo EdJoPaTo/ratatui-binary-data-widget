@@ -5,14 +5,19 @@ version = "0.1.0"
 license = "MIT"
 repository = "https://github.com/EdJoPaTo/ratatui-binary-data-widget"
 authors = ["EdJoPaTo <ratatui-binary-data-widget-rust@edjopato.de>"]
-edition = "2021"
+edition = "2024"
 keywords = ["tui", "terminal", "binary", "widget"]
 categories = ["command-line-interface"]
 include = ["src/**/*", "README.md"]
 
+[lints.rust]
+unused_qualifications = "warn"
 [lints.clippy]
-pedantic = "warn"
-nursery = "warn"
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+allow_attributes = "warn"
+min_ident_chars = "warn"
+unused_trait_names = "warn"
 
 [profile.bench]
 codegen-units = 1

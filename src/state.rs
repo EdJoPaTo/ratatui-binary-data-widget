@@ -164,7 +164,7 @@ impl State {
     ///
     /// Returns `true` when the selection changed
     pub fn select_at(&mut self, column: u16, row: u16) -> bool {
-        #[allow(clippy::option_if_let_else)]
+        #[expect(clippy::option_if_let_else)]
         if let Some(address) = self.clicked_address(column, row) {
             self.select_address(Some(address))
         } else {

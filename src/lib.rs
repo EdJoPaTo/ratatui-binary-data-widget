@@ -1,11 +1,9 @@
-/*!
-Widget built to show binary data.
-
-The main struct is the [`BinaryDataWidget`].
-The user interaction state (like the current selection) is stored in the [`BinaryDataWidgetState`].
-
-For the used colors see the source code of [`color()`].
-*/
+//! Widget built to show binary data.
+//!
+//! The main struct is the [`BinaryDataWidget`].
+//! The user interaction state (like the current selection) is stored in the [`BinaryDataWidgetState`].
+//!
+//! For the used colors see the source code of [`color()`].
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
@@ -69,7 +67,6 @@ impl<'a> BinaryDataWidget<'a> {
         }
     }
 
-    #[allow(clippy::missing_const_for_fn)]
     pub fn block(mut self, block: Block<'a>) -> Self {
         self.block = Some(block);
         self
@@ -99,7 +96,7 @@ impl<'a> BinaryDataWidget<'a> {
 impl StatefulWidget for BinaryDataWidget<'_> {
     type State = BinaryDataWidgetState;
 
-    #[allow(clippy::too_many_lines)]
+    #[expect(clippy::too_many_lines)]
     fn render(self, full_area: Rect, buffer: &mut Buffer, state: &mut Self::State) {
         buffer.set_style(full_area, self.style);
 
@@ -181,7 +178,7 @@ impl StatefulWidget for BinaryDataWidget<'_> {
         }
 
         let address_width = address_width as usize;
-        #[allow(clippy::cast_possible_truncation)]
+        #[expect(clippy::cast_possible_truncation)]
         let visible_lines = visible_lines as u16;
         let x = area.left();
 
