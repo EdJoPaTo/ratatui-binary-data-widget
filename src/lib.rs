@@ -1,11 +1,9 @@
-/*!
-Widget built to show binary data.
-
-The main struct is the [`BinaryDataWidget`].
-The user interaction state (like the current selection) is stored in the [`BinaryDataWidgetState`].
-
-For the used colors see the source code of [`color()`].
-*/
+//! Widget built to show binary data.
+//!
+//! The main struct is the [`BinaryDataWidget`].
+//! The user interaction state (like the current selection) is stored in the [`BinaryDataWidgetState`].
+//!
+//! For the used colors see the source code of [`color()`].
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
@@ -69,7 +67,6 @@ impl<'a> BinaryDataWidget<'a> {
         }
     }
 
-    #[allow(clippy::missing_const_for_fn)]
     pub fn block(mut self, block: Block<'a>) -> Self {
         self.block = Some(block);
         self
