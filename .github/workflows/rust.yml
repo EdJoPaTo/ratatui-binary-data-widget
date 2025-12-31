@@ -15,7 +15,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cargo fmt --check --verbose
 
   clippy:
@@ -35,7 +35,7 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
           components: clippy
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cargo fetch
       - run: cargo clippy --offline --all-targets
       - run: cargo doc --offline --no-deps
@@ -58,7 +58,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cargo fetch
       - run: cargo build --offline --all-targets
       - run: cargo test --offline --no-fail-fast
@@ -103,7 +103,7 @@ jobs:
         with:
           tool: cross
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cargo fetch
 
       - run: ${{ runner.os == 'Linux' && 'cross' || 'cargo' }} build --release --offline --target ${{ matrix.triple }}

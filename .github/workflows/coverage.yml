@@ -13,12 +13,12 @@ jobs:
           components: llvm-tools-preview
       - uses: taiki-e/install-action@cargo-llvm-cov
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cargo fetch
 
-      - run: cargo llvm-cov --all-features --html
+      - run: cargo llvm-cov --html
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: target/llvm-cov/html
