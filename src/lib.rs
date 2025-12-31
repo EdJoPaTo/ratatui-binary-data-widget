@@ -8,9 +8,8 @@
 use ratatui::buffer::Buffer;
 use ratatui::layout::{Position, Rect};
 use ratatui::style::{Color, Style};
-use ratatui::widgets::block::BlockExt as _;
 use ratatui::widgets::{
-    Block, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget,
+    Block, BlockExt as _, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget,
 };
 
 pub use self::color::color;
@@ -40,7 +39,7 @@ mod state;
 ///     let widget = BinaryDataWidget::new(data).block(block);
 ///     frame.render_stateful_widget(widget, frame.area(), &mut state);
 /// })?;
-/// # Ok::<(), std::io::Error>(())
+/// # Ok::<(), std::convert::Infallible>(())
 /// ```
 #[must_use = "The widget is only useful when rendered"]
 #[derive(Debug, Clone)]

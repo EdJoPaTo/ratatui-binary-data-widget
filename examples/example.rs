@@ -154,7 +154,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> std::io::Result<()> {
+fn run_app<B>(terminal: &mut Terminal<B>, mut app: App) -> Result<(), B::Error>
+where
+    B: Backend,
+    B::Error: From<std::io::Error>,
+{
     const INTERVAL: Duration = Duration::from_millis(200); // 5 FPS
     const DEBOUNCE: Duration = Duration::from_millis(20); // 50 FPS
     terminal.draw(|frame| app.draw(frame))?;
