@@ -5,12 +5,12 @@
 //!
 //! For the used colors see the source code of [`color()`].
 
-use ratatui::buffer::Buffer;
-use ratatui::layout::{Position, Rect};
-use ratatui::style::{Color, Style};
-use ratatui::widgets::{
-    Block, BlockExt as _, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget, Widget,
-};
+use ratatui_core::buffer::Buffer;
+use ratatui_core::layout::{Position, Rect};
+use ratatui_core::style::{Color, Style};
+use ratatui_core::widgets::{StatefulWidget, Widget};
+pub use ratatui_widgets::block::{Block, BlockExt as _};
+use ratatui_widgets::scrollbar::{Scrollbar, ScrollbarOrientation, ScrollbarState};
 
 pub use self::color::color;
 use self::render_positions::RenderPositions;

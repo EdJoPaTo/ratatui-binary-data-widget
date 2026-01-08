@@ -1,4 +1,4 @@
-use ratatui::layout::Rect;
+use ratatui_core::layout::Rect;
 
 #[must_use]
 #[derive(Debug, Clone, Copy)]
