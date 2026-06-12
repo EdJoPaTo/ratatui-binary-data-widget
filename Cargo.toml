@@ -6,6 +6,7 @@ license = "MIT"
 repository = "https://github.com/EdJoPaTo/ratatui-binary-data-widget"
 authors = ["EdJoPaTo <ratatui-binary-data-widget-rust@edjopato.de>"]
 edition = "2024"
+rust-version = "1.86"
 keywords = ["tui", "terminal", "binary", "widget"]
 categories = ["command-line-interface"]
 include = ["src/**/*", "README.md"]
