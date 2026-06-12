@@ -14,7 +14,7 @@ pub struct RenderPositions {
 
 impl RenderPositions {
     #[must_use]
-    pub fn new(inner_area: Rect, data_length: usize) -> Option<Self> {
+    pub const fn new(inner_area: Rect, data_length: usize) -> Option<Self> {
         const TWO_ADDRESSES_TAKE: u16 = 4 + 2 + 1; // binary + char + whitespace
         const CHAR_OFFSET_PER_TWO: u16 = 4 + 1;
 
@@ -23,12 +23,8 @@ impl RenderPositions {
         }
 
         let biggest_address = data_length.saturating_sub(1);
-        #[expect(
-            clippy::cast_possible_truncation,
-            clippy::cast_precision_loss,
-            clippy::cast_sign_loss
-        )]
-        let address_width = (biggest_address as f32).log(16.0).ceil() as u16;
+        #[expect(clippy::cast_possible_truncation)]
+        let address_width = address_width(biggest_address) as u16;
         let data_width = inner_area
             .width
             .saturating_sub(2)
@@ -101,4 +97,32 @@ impl RenderPositions {
             offset_address.saturating_add(index as usize)
         }
     }
+}
+
+const fn address_width(address: usize) -> u32 {
+    // Ignore the address == 0 -> width 1 case as its only used for the biggest address which is always >0
+    (usize::BITS - address.leading_zeros()).div_ceil(4)
+}
+
+#[cfg(test)]
+#[rstest::rstest]
+#[case(1, 5)]
+#[case(1, 10)]
+#[case(2, 0x10)]
+#[case(3, 0x100)]
+#[case(4, 0x1000)]
+#[case(5, 0x10000)]
+#[case(6, 0x100_000)]
+#[case(7, 0x1_000_000)]
+#[case(8, 0x10_000_000)]
+fn address_width_works(#[case] expected: u32, #[case] address: usize) {
+    dbg!(address);
+    let formatted = format!("{address:x}");
+    eprintln!("width:{:>2} 0x{formatted}", formatted.len());
+
+    assert_eq!(expected, address_width(address));
+
+    #[expect(clippy::cast_possible_truncation)]
+    let via_format = formatted.len() as u32;
+    assert_eq!(expected, via_format, "via format");
 }
