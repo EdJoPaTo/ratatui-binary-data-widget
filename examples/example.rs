@@ -1,8 +1,9 @@
-use std::error::Error;
-use std::fmt::Write as _;
+use core::error::Error;
+use core::fmt::Write as _;
+use core::time::Duration;
 use std::fs;
 use std::path::Path;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use ratatui::backend::{Backend, CrosstermBackend};
 use ratatui::crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind};

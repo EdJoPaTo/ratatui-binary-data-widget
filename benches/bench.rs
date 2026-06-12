@@ -1,4 +1,4 @@
-use std::hint::black_box;
+use core::hint::black_box;
 
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
 use ratatui::buffer::Buffer;

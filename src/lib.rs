@@ -5,6 +5,11 @@
 //!
 //! For the used colors see the source code of [`color()`].
 
+#![cfg_attr(not(test), no_std)]
+extern crate alloc;
+
+use alloc::format;
+
 use ratatui_core::buffer::Buffer;
 use ratatui_core::layout::{Position, Rect};
 use ratatui_core::style::{Color, Style};
